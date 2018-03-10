@@ -15,8 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "jsonwebtoken": "^8.2.0",
+    "lodash": "^4.17.5",
     "mysql": "^2.15.0",
     "mysql2": "^1.5.2",
     "sequelize": "^4.35.2"

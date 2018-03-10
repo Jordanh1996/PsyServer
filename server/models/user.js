@@ -1,6 +1,8 @@
-const sequelize = require('../db/database');
+const Sequelize = require('sequelize');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+
+const sequelize = require('../db/database');
 
 const User = sequelize.define('user', {
     username: {
@@ -23,6 +25,10 @@ const User = sequelize.define('user', {
                 msg: "String length is not in this range"
            }
         }
+    },
+    token: {
+        type: Sequelize.STRING,
+        allowNull: true
     }
 }, {
     timestamps: false
@@ -30,27 +36,27 @@ const User = sequelize.define('user', {
 
 // Hashing password
 
-User.beforeCreate((user, options, done) => {
-    bcrypt.hash(user.password, 10, (err, hash) => {
-        if (err) {
-            return console.log('an error occured trying to hash given password', err);
-        };
-        user.password = hash;
-        done();
-    });
+User.beforeCreate((user, done) => {
+    return new Promise((resolve, reject) => {
+        bcrypt.hash(user.password, 10, (err, hash) => {
+            if (err) {
+                console.log('an error occured trying to hash given password', err);
+                reject();
+            };
+            user.password = hash;
+            resolve();
+        });
+    })
 });
 
 // Instance Methods
 
 User.prototype.generateAuthToken = function () {
-    var user = this;
     var access = 'auth';
-    var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
+    this.token = jwt.sign({username: this.username, access}, process.env.JWT_SECRET).toString();
 
-    user.tokens = [{access, token}];
-
-    return user.save().then(() => {
-        return token;
+    return this.save().then(() => {
+        return this.token;
     });
 };
 
