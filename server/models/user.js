@@ -60,37 +60,38 @@ User.prototype.generateAuthToken = function () {
     });
 };
 
-User.prototype.removeToken = function (token) {
-    var user = this;
-
-    return user.update({
-        $pull: {
-            tokens: {token}
-        }
-    });
+User.prototype.removeToken = function () {
+    this.token = null;
+    return this.save();
 };
 
 // Class Methods
 
 User.findByToken = function (token) {
-    var User = this;
-    var decoded;
-
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (e) {
-        return Promise.reject();
-    };
-
-    return User.findOne({
-        '_id': decoded._id,
-        'tokens.token': token,
-        'tokens.access': 'auth'
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, { username }) => {
+            if (err) {
+                reject();
+            };
+            User.findOne({
+                where: {
+                    token,
+                    username,
+                },
+            })
+            .then((user) => {
+                resolve(user)
+            })
+        });
     });
 };
 
 User.findByCredentials = function (username, password) {
-    return this.findOne({username}).then((user) => {
+    return User.findOne({
+        where: {
+            username
+        }
+    }).then((user) => {
         if (!user) {
             return Promise.reject();
         };

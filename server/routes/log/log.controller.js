@@ -1,5 +1,19 @@
-const Service = require('./register.service');
 const _ = require('lodash');
+const User = require('../../models/user');
+const Service = require('./log.service');
+
+const LogIn = (req, res) => {
+    const body = _.pick(req.body, ['username', 'password']);
+    User.findByCredentials(body.username, body.password)
+    .then((user) => {
+        user.generateAuthToken()
+        .then((token) => {
+            res.header('x-auth', token).send();
+        });
+    }).catch((e) => {
+        res.status(404).send();
+    });
+};
 
 const Register = (req, res) => {
     const body = _.pick(req.body, ['username', 'password']);
@@ -29,9 +43,8 @@ const UserCheck = (req, res) => {
     });
 };
 
-
-
 module.exports = {
+    LogIn,
     Register,
-    UserCheck
+    UserCheck,
 };

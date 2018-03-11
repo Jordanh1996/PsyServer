@@ -7,8 +7,7 @@ const cors = require('cors');
 
 const sequelize = require('./db/database');
 const RegisterRoute = require('./routes/register');
-
-     const User = require('./models/user');
+const LogRoute = require('./routes/log');
 
 const app = express();
 var port = process.env.PORT;
@@ -37,7 +36,7 @@ sequelize
 
 
 
-User.sync()
+// User.sync()
 // User.create({
 //     username: 'ssssssss',
 //     password: '123123'
@@ -52,6 +51,7 @@ User.sync()
 // })
 
 app.use('/register', RegisterRoute);
+app.use('/log', LogRoute);
 
 app.listen(port, () => {
     console.log(`server is up on port ${port}`);
